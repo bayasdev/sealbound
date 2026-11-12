@@ -1,8 +1,13 @@
 # Changelog
 
+## 1.0.2
+
+- The publish workflow runs the toolchain, publishes and creates the release in three jobs, each with only the permission it needs, and every action is pinned to a commit.
+- `reseal` opens the value the sealer made with the opener's current key and compares it with the original before returning it. 1.0.1 read the key id on that value, which a sealer of your own could set to the current key while sealing with another, or for another context. A value `reseal` returns now always opens with the current key.
+
 ## 1.0.1
 
-Fixes from a security review. Nothing sealed with 1.0.0 changes, and everything it sealed still opens.
+Fixes from a security review. The format is the same, and what 1.0.0 sealed on a little-endian machine, which is nearly every machine, still opens.
 
 - `reseal` checks the value the sealer made, not the key id the sealer reports, so a sealer of your own or one that was changed can't leave values on a retired key. Sealers and openers are now frozen.
 - A context with tens of thousands of parts no longer overflows the stack.

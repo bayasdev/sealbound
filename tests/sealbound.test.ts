@@ -662,6 +662,45 @@ describe("what the third review found", () => {
     ).toBe("key_mismatch");
   });
 
+  it("reseal opens what the sealer made: a sealer that relabels its output, seals for another context or seals another value is refused", () => {
+    const retired = generateKeys();
+
+    const rotated = createOpener({
+      retiredSecretKeys: [retired.secretKey],
+      secretKey: keys.secretKey,
+    });
+
+    const old = createSealer(retired.publicKey);
+    const box = old.seal(new Uint8Array([1]), CONTEXT);
+
+    const relabelling = {
+      keyId: rotated.keyId,
+      seal: (plaintext: Uint8Array, context: Context) => ({
+        ...old.seal(plaintext, context),
+        keyId: rotated.keyId,
+      }),
+    };
+
+    const elsewhere = {
+      keyId: rotated.keyId,
+      seal: (plaintext: Uint8Array) => sealer.seal(plaintext, "elsewhere"),
+    };
+
+    const swapping = {
+      keyId: rotated.keyId,
+      seal: (_plaintext: Uint8Array, context: Context) =>
+        sealer.seal(new Uint8Array([2]), context),
+    };
+
+    expect(
+      [relabelling, elsewhere, swapping].map((custom) =>
+        refusal(
+          () => reseal({ opener: rotated, sealer: custom }, box, CONTEXT) ?? {}
+        )
+      )
+    ).toStrictEqual(["key_mismatch", "key_mismatch", "key_mismatch"]);
+  });
+
   it("a sealer and an opener can't be changed after they are made", () => {
     expect([Object.isFrozen(sealer), Object.isFrozen(opener)]).toStrictEqual([
       true,

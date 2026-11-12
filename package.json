@@ -1,6 +1,6 @@
 {
   "name": "sealbound",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Store secrets in your own database: sealed with a public key, bound to what they belong to, with key rotation. libsodium sealed boxes on audited noble cryptography, for Node.js, Bun, Deno, browsers and Workers.",
   "keywords": [
     "cloudflare workers",

@@ -1,6 +1,8 @@
 # Changelog
 
-## 1.0.2
+## 1.0.3
+
+The first release after 1.0.1: 1.0.2 was tagged and never reached npm, because the new publish workflow failed at its last step.
 
 - The publish workflow runs the toolchain, publishes and creates the release in three jobs, each with only the permission it needs, and every action is pinned to a commit.
 - `reseal` opens the value the sealer made with the opener's current key and compares it with the original before returning it. 1.0.1 read the key id on that value, which a sealer of your own could set to the current key while sealing with another, or for another context. A value `reseal` returns now always opens with the current key.

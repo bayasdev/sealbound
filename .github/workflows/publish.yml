@@ -70,7 +70,9 @@ jobs:
           registry-url: https://registry.npmjs.org
       # The tarball the first job packed, as it is: no script of the
       # package's runs here.
-      - run: npm publish release/*.tgz --ignore-scripts
+      # The path starts with ./ so npm reads it as a file: "release/x.tgz"
+      # alone is its shorthand for a GitHub repository.
+      - run: npm publish ./release/*.tgz --ignore-scripts
 
   release:
     name: Create the GitHub release

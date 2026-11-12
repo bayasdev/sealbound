@@ -27,10 +27,12 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Built first: the lint reads the types of what scripts/smoke.mjs
+      # imports, which is the built package.
+      - run: pnpm build
       - run: pnpm check
       - run: pnpm check-types
       - run: pnpm test
-      - run: pnpm build
       - run: pnpm check-package
 
   load:

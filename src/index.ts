@@ -1,5 +1,10 @@
 import { hsalsa, secretbox } from "@noble/ciphers/salsa.js";
-import { equalBytes, u8, u32 } from "@noble/ciphers/utils.js";
+import {
+  equalBytes,
+  isBytes as isNobleBytes,
+  u8,
+  u32,
+} from "@noble/ciphers/utils.js";
 import { x25519 } from "@noble/curves/ed25519.js";
 import { blake2b } from "@noble/hashes/blake2.js";
 import { bytesToHex, concatBytes } from "@noble/hashes/utils.js";
@@ -69,11 +74,11 @@ const isOnePart = (value: Context): value is string =>
 const isList = (value: readonly string[]): value is readonly string[] =>
   Array.isArray(value);
 
-// Asked of the value's own tag, not `instanceof`: bytes made in another
-// realm (an iframe, a test sandbox) are no instance of this realm's
-// Uint8Array, and are bytes all the same.
-const isBytes = (value: Uint8Array): value is Uint8Array =>
-  Object.prototype.toString.call(value) === "[object Uint8Array]";
+// noble's own test, so nothing passes here that the primitives then refuse:
+// a real view over a buffer, of this realm or another. Bytes made in an
+// iframe or a test sandbox are no instance of this realm's Uint8Array, and
+// are bytes all the same; an object that only names itself one is not.
+const isBytes = (value: Uint8Array): value is Uint8Array => isNobleBytes(value);
 
 const isSealed = (value: Sealed): value is Sealed =>
   typeof value === "object" &&
@@ -129,12 +134,16 @@ const toBase64 = (bytes: Uint8Array) => {
 const hash = (bytes: Uint8Array, length: number) =>
   blake2b(bytes, { dkLen: length });
 
-/** A key from its text: standard base64 of exactly 32 bytes. */
+/**
+ * A key from its text: standard base64 of exactly 32 bytes, in the one
+ * spelling base64 has for them. Its last character has bits to spare, which
+ * a decoder ignores, so other texts would read as the same key.
+ */
 const keyFrom = (value: string) => {
   const bytes =
     isText(value) && BASE64.test(value) ? fromBase64(value) : undefined;
 
-  if (bytes?.length !== KEY_BYTES) {
+  if (bytes?.length !== KEY_BYTES || toBase64(bytes) !== value) {
     throw new SealboundError(
       "A key is not 32 bytes of standard base64",
       "invalid_key"
@@ -177,17 +186,20 @@ const publicKeyFrom = (value: string) => {
   return key;
 };
 
-/** A key pair's id: the first 8 bytes of its public key's BLAKE2b, in hex. */
+/**
+ * A key pair's id: BLAKE2b of its public key with an 8-byte digest, in hex.
+ * The digest's length is part of what BLAKE2b hashes, so this is not the
+ * start of a longer digest.
+ */
 const keyIdOf = (publicKey: Uint8Array) =>
   bytesToHex(hash(publicKey, KEY_ID_BYTES));
 
-/** "expand 32-byte k", the Salsa20 constant, as little-endian words. */
-const SIGMA = Uint32Array.of(
-  0x61_70_78_65,
-  0x33_20_64_6e,
-  0x79_62_2d_32,
-  0x6b_20_65_74
-);
+/**
+ * The Salsa20 constant, as words read from its bytes: noble swaps the words
+ * it is given on a big-endian machine, so words written as numbers would be
+ * swapped into another constant there.
+ */
+const SIGMA = u32(new TextEncoder().encode("expand 32-byte k"));
 
 /**
  * NaCl's `crypto_box_beforenm`: the box key two X25519 keys share, which
@@ -240,6 +252,12 @@ const CONTEXT_BYTES = 32;
 const DOMAIN = new TextEncoder().encode("sealbound/v1");
 const MAX_PART_BYTES = 0xff_ff_ff_ff;
 
+/**
+ * A surrogate that is not half of a pair: with the `u` flag a pair is read
+ * as one character, so only a lone one matches.
+ */
+const LONE_SURROGATE = /\p{Surrogate}/u;
+
 const invalidContext = (message: string) =>
   new SealboundError(message, "invalid_context");
 
@@ -261,7 +279,7 @@ const partsOf = (context: Context) => {
       throw invalidContext("A context's part is an empty string or no string");
     }
 
-    if (!part.isWellFormed()) {
+    if (LONE_SURROGATE.test(part)) {
       throw invalidContext("A context's part has a lone surrogate");
     }
 
@@ -274,19 +292,31 @@ const partsOf = (context: Context) => {
  * big-endian bytes: no two lists of parts are hashed as the same bytes.
  */
 const contextDigest = (context: Context) => {
-  const pieces = [DOMAIN];
+  const parts = partsOf(context);
+  let size = DOMAIN.length;
 
-  for (const part of partsOf(context)) {
+  for (const part of parts) {
     if (part.length > MAX_PART_BYTES) {
       throw invalidContext("A context's part is too long");
     }
 
-    const length = new Uint8Array(4);
-    new DataView(length.buffer).setUint32(0, part.length);
-    pieces.push(length, part);
+    size += 4 + part.length;
   }
 
-  return hash(concatBytes(...pieces), CONTEXT_BYTES);
+  // Written into one buffer: a context may have more parts than a function
+  // takes arguments.
+  const bytes = new Uint8Array(size);
+  const view = new DataView(bytes.buffer);
+  bytes.set(DOMAIN);
+  let offset = DOMAIN.length;
+
+  for (const part of parts) {
+    view.setUint32(offset, part.length);
+    bytes.set(part, offset + 4);
+    offset += 4 + part.length;
+  }
+
+  return hash(bytes, CONTEXT_BYTES);
 };
 
 /** What is sealed: the version, the context's digest and the value. */
@@ -374,13 +404,13 @@ export const createSealer = (publicKey: string): Sealer => {
   const key = publicKeyFrom(publicKey);
   const keyId = keyIdOf(key);
 
-  return {
+  return Object.freeze({
     keyId,
-    seal: (plaintext, context) => ({
+    seal: (plaintext: Uint8Array, context: Context) => ({
       ciphertext: sealTo(bind(plaintext, context), key),
       keyId,
     }),
-  };
+  });
 };
 
 const pairOf = (secretKey: string): KeyPair => {
@@ -433,15 +463,15 @@ export const createOpener = (keys: OpenerKeys): Opener => {
     }
   };
 
-  return {
+  return Object.freeze({
     keyId,
-    open: (sealed, context) => {
+    open: (sealed: Sealed, context: Context) => {
       const digest = contextDigest(context);
 
       return unbind(decrypt(checkSealed(sealed)), digest);
     },
     publicKey: toBase64(current.publicKey),
-  };
+  });
 };
 
 /**
@@ -475,7 +505,22 @@ export const reseal = (
   // Opened first in every case, so a value bound to another owner is refused.
   const plaintext = opener.open(sealed, context);
 
-  return sealed.keyId === sealer.keyId ? null : sealer.seal(plaintext, context);
+  if (sealed.keyId === opener.keyId) {
+    return null;
+  }
+
+  // What the sealer made is checked, not what it says of itself: a sealer of
+  // the caller's own, or one whose key id was changed, may seal with another.
+  const moved = checkSealed(sealer.seal(plaintext, context));
+
+  if (moved.keyId !== opener.keyId) {
+    throw new SealboundError(
+      "The sealer doesn't seal with the opener's current key",
+      "key_mismatch"
+    );
+  }
+
+  return moved;
 };
 
 /** Starts a sealed value written as text; a later format gets another. */

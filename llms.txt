@@ -1,6 +1,6 @@
 # sealbound
 
-> Encrypts secrets for storage in an application's own database (API tokens, webhook secrets, certificates): sealed with a public key, bound to the record they belong to, with key rotation. A sealed value is a standard libsodium sealed box (crypto_box_seal, X25519 + XSalsa20-Poly1305), with primitives from the noble libraries. TypeScript, ES module, no native code: Node.js 22.12 or later, Bun, Deno, browsers and Cloudflare Workers.
+> Encrypts secrets for storage in an application's own database (API tokens, webhook secrets, certificates): sealed with a public key, bound to what they belong to, with key rotation. A sealed value is a standard libsodium sealed box (crypto_box_seal, X25519 + XSalsa20-Poly1305), with primitives from the noble libraries. TypeScript, ES module, no native code: Node.js 22.12 or later, Bun, Deno, browsers and Cloudflare Workers.
 
 Install with `npm install sealbound`.
 
@@ -20,7 +20,7 @@ const bytes = opener.open(sealed, ["user", "42", "api-token"]); // throws Sealbo
 Things worth knowing before using it:
 
 - seal and open take and return bytes (Uint8Array), never strings: use TextEncoder and TextDecoder. A string value is refused with reason "invalid_value".
-- The second argument of seal and open is the context: what the value belongs to, as a list of non-empty strings (the kind of owner, the owner's id, which secret) or one string. Convert ids with String(id); undefined, null and numbers are refused with reason "invalid_context". It is not stored and not secret. Opening with a different context throws reason "wrong_context", so a sealed value copied to another record can't be opened as that record's.
+- The second argument of seal and open is the context: what the value belongs to, as a list of non-empty strings (the kind of owner, the owner's id, which secret) or one string. Convert ids with String(id); undefined, null and numbers are refused with reason "invalid_context". When an owner can have several values of one kind, add a part that tells them apart (the token's own id): values sealed for the same context can be swapped. It is not stored and not secret. Opening with a different context throws reason "wrong_context", so a sealed value copied to another record can't be opened as that record's.
 - A process that only stores secrets should hold only the public key. Only what reads them needs the secret key. Do not send the public key to browsers: whoever has it can seal values of their own.
 - createOpener takes an options object: `{ secretKey, retiredSecretKeys? }`. `opener.publicKey` is the matching public key.
 - If the database returns the ciphertext as something other than a Uint8Array (a Buffer is fine, a string is not), open throws reason "malformed". For text columns store `encode(sealed)` and read with `decode(text)`.
@@ -28,7 +28,7 @@ Things worth knowing before using it:
 - To rotate keys: create the opener with the new secret key and the old one as retired (`createOpener({ secretKey: newSecret, retiredSecretKeys: [oldSecret] })`), build the sealer from `opener.publicKey`, run `reseal({ opener, sealer }, sealed, context)` over every stored value and save what it returns (null means it is already on the current key), then drop the old key.
 - Someone with write access to the database can put back an older sealed value for the same context. Put a version in the context if that matters.
 - Sealed boxes have no forward secrecy: whoever gets the secret key reads everything sealed with it.
-- The format: ciphertext is `crypto_box_seal(0x01 || BLAKE2b-256("sealbound/v1" || for each part: uint32be(byte length of utf8(part)) || utf8(part)) || value, publicKey)`; keyId is the first 8 bytes of BLAKE2b(publicKey) in hex; as text, `sb1.<keyId>.<base64url ciphertext>`.
+- The format: ciphertext is `crypto_box_seal(0x01 || BLAKE2b-256("sealbound/v1" || for each part: uint32be(byte length of utf8(part)) || utf8(part)) || value, publicKey)`; keyId is BLAKE2b with an 8-byte digest of the public key (libsodium crypto_generichash(8, publicKey)), in lowercase hex, not the start of a longer digest; as text, `sb1.<keyId>.<base64url ciphertext>`.
 
 ## Docs
 

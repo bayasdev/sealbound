@@ -1,7 +1,7 @@
 {
   "name": "sealbound",
-  "version": "1.0.0",
-  "description": "Store secrets in your own database: sealed with a public key, bound to the row they belong to, with key rotation. libsodium sealed boxes on audited noble cryptography, for Node.js, Bun, Deno, browsers and Workers.",
+  "version": "1.0.1",
+  "description": "Store secrets in your own database: sealed with a public key, bound to what they belong to, with key rotation. libsodium sealed boxes on audited noble cryptography, for Node.js, Bun, Deno, browsers and Workers.",
   "keywords": [
     "cloudflare workers",
     "crypto_box_seal",
@@ -49,7 +49,7 @@
     "check-package": "publint && attw --pack . --profile esm-only",
     "fix": "ultracite fix",
     "test": "vitest run",
-    "prepublishOnly": "pnpm build && pnpm check && pnpm check-types && pnpm test && pnpm check-package"
+    "prepublishOnly": "pnpm audit --prod && pnpm build && pnpm check && pnpm check-types && pnpm test && pnpm check-package"
   },
   "dependencies": {
     "@noble/ciphers": "^2.4.0",

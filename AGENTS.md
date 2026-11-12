@@ -12,7 +12,7 @@ Every public function checks what it is given, because a caller without types ca
 
 ## Dependencies
 
-The runtime dependencies are the cryptography, so they are caret ranges: whoever installs the library gets their security patches without waiting for a release here. `pnpm audit --prod` reports nothing before a release. Development dependencies are pinned exactly.
+The runtime dependencies are the cryptography, so they are caret ranges: whoever installs the library gets their security patches without waiting for a release here. `pnpm audit --prod` reports nothing: CI and the release both run it. Development dependencies are pinned exactly.
 
 ## Checks
 

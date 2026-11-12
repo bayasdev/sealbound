@@ -640,3 +640,86 @@ describe("what the second review found", () => {
     });
   });
 });
+
+describe("what the third review found", () => {
+  it("reseal checks what the sealer made, whatever the sealer says its key is", () => {
+    const retired = generateKeys();
+
+    const rotated = createOpener({
+      retiredSecretKeys: [retired.secretKey],
+      secretKey: keys.secretKey,
+    });
+
+    const old = createSealer(retired.publicKey);
+    // A sealer of the caller's own, which names the current key and seals
+    // with the retired one.
+    const lying = { keyId: rotated.keyId, seal: old.seal };
+    const box = old.seal(new Uint8Array([1]), CONTEXT);
+    expect(
+      refusal(
+        () => reseal({ opener: rotated, sealer: lying }, box, CONTEXT) ?? {}
+      )
+    ).toBe("key_mismatch");
+  });
+
+  it("a sealer and an opener can't be changed after they are made", () => {
+    expect([Object.isFrozen(sealer), Object.isFrozen(opener)]).toStrictEqual([
+      true,
+      true,
+    ]);
+  });
+
+  it("a context of more parts than a function takes arguments is sealed and opened like any other", () => {
+    // 70,000 parts overflowed the stack when they were passed as arguments.
+    const many = Array.from({ length: 70_000 }, (_, index) => String(index));
+    const sealed = sealer.seal(new Uint8Array([4]), many);
+    expect(opener.open(sealed, many)).toStrictEqual(new Uint8Array([4]));
+    expect(refusal(() => opener.open(sealed, many.slice(1)))).toBe(
+      "wrong_context"
+    );
+  });
+
+  const named = {
+    length: 3,
+    subarray: () => [1, 2, 3],
+    [Symbol.toStringTag]: "Uint8Array",
+  };
+
+  it.each([
+    ["an object that names itself a Uint8Array", named],
+    ["bytes of another width", new Uint16Array([1, 2, 3])],
+  ])("%s is no value to seal", (_, fake) => {
+    expect(
+      refusal(() => (asBytes(fake) ? sealer.seal(fake, CONTEXT) : {}))
+    ).toBe("invalid_value");
+  });
+
+  it.each([
+    [
+      "an object that names itself a Uint8Array",
+      { ciphertext: named, keyId: sealer.keyId },
+    ],
+    [
+      "bytes of another width",
+      { ciphertext: new Uint16Array([1, 2, 3]), keyId: sealer.keyId },
+    ],
+  ])("%s is no ciphertext", (_, sealed) => {
+    expect(refusal(() => (asSealed(sealed) ? encode(sealed) : {}))).toBe(
+      "malformed"
+    );
+  });
+
+  it("a key in another base64 spelling of the same bytes is refused", () => {
+    // 32 bytes leave the last character before the padding two spare bits
+    // (RFC 4648, section 3.5), so three other characters read the same.
+    const ALPHABET =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    const last = keys.publicKey.at(-2) ?? "";
+    const respelled = `${keys.publicKey.slice(0, -2)}${ALPHABET.charAt(ALPHABET.indexOf(last) + 1)}=`;
+    expect(Buffer.from(respelled, "base64")).toStrictEqual(
+      Buffer.from(keys.publicKey, "base64")
+    );
+    expect(refusal(() => createSealer(respelled))).toBe("invalid_key");
+  });
+});

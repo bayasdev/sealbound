@@ -27,6 +27,8 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # What ships has no known vulnerability.
+      - run: pnpm audit --prod
       # Built first: the lint reads the types of what scripts/smoke.mjs
       # imports, which is the built package.
       - run: pnpm build

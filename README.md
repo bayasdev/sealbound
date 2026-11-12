@@ -4,7 +4,7 @@
 
 # sealbound
 
-Store secrets in your own database: sealed with a public key, bound to the row they belong to, with key rotation.
+Store secrets in your own database: sealed with a public key, bound to what they belong to, with key rotation.
 
 [![npm](https://img.shields.io/npm/v/sealbound)](https://www.npmjs.com/package/sealbound) [![Downloads](https://img.shields.io/npm/dm/sealbound)](https://www.npmjs.com/package/sealbound) [![CI](https://github.com/bayasdev/sealbound/actions/workflows/ci.yml/badge.svg)](https://github.com/bayasdev/sealbound/actions/workflows/ci.yml) [![License](https://img.shields.io/npm/l/sealbound)](https://github.com/bayasdev/sealbound/blob/main/LICENSE)
 
@@ -73,6 +73,7 @@ Store both fields. `seal` takes a `Uint8Array`; use `new TextEncoder().encode(te
 The second argument is the **context**: what the value belongs to. It isn't stored and it isn't secret. You give the same one again to open.
 
 - Give it as a list of parts: the kind of owner, the owner's id and, when one row holds several secrets, which one it is. Parts are kept apart, so `["org", "a:b", "c"]` and `["org", "a", "b:c"]` are two contexts. A single string works too, and is the same as a list of one part.
+- When an owner can have several values of one kind, such as two API tokens, add a part that tells them apart, like the token's own id: `["user", "42", "api-token", tokenId]`. Two values sealed for the same context can be swapped for each other.
 - Every part is a non-empty string: convert ids with `String(id)`. A missing id is refused instead of quietly becoming the text `"undefined"`.
 - Contexts are compared byte for byte. `"é"` written as one character and as `e` plus an accent are two contexts, so build them from ids, not from text people type.
 
@@ -166,7 +167,7 @@ A sealed value's `ciphertext` is a libsodium sealed box (`crypto_box_seal`) of:
 
 The context's digest is BLAKE2b-256 of the ASCII bytes `sealbound/v1` followed, for each part, by the length of the part's UTF-8 bytes as a 32-bit big-endian integer and those bytes. A context has at least one part, and every part is a non-empty string of valid Unicode. One string is a context of that one part.
 
-`keyId` is the first 8 bytes of the BLAKE2b hash of the public key, in lowercase hex: libsodium's `crypto_generichash(8, publicKey)`.
+`keyId` is BLAKE2b of the public key with an 8-byte digest, in lowercase hex: libsodium's `crypto_generichash(8, publicKey)`. It is not the first 8 bytes of a longer BLAKE2b digest, because the digest's length is part of what BLAKE2b hashes.
 
 As text, a sealed value is `sb1.<keyId>.<ciphertext in base64url without padding>`. Only that exact text is read back: padding, capitals in the key id, or spare bits set in the last character are refused.
 
@@ -182,11 +183,12 @@ Values sealed by any 1.x version keep opening in every later version. A test ope
 ## What it protects, and what it doesn't
 
 - **Reading the database isn't enough.** Someone who reads your database, or takes over a process that holds only the public key, learns nothing about the values but their length.
-- **A value can't be moved.** Someone who can write to the database can't make one owner's value open as another's.
+- **A value can't be moved to another context.** Someone who can write to the database can't make one owner's value open as another's. Two values sealed for the same context can be swapped, so give each its own.
 - **An old value can be put back.** Someone who can write to the database can restore an earlier sealed value for the same context, such as a token you replaced, and it opens. If that matters, put a version or a date in the context.
 - **The public key lets anyone seal.** Whoever has the public key can seal a value of their own for any context, and with write access to the database can replace a stored secret with one they know. Keep the public key on your servers. The context stops a value from being moved; it doesn't prove who stored it.
 - **The secret key opens everything.** Sealed boxes have no forward secrecy: after a leak, rotate, reseal, and treat what was sealed before as exposed.
 - **The context and the key id aren't hidden.** Don't put a secret in a context.
+- **Secrets stay in memory until the engine frees it.** JavaScript has no way to wipe a key or an opened value.
 - **JavaScript isn't constant-time.** The noble libraries aim for constant-time algorithms, but no JavaScript engine guarantees it. An attacker who can make your opener process many values of their choosing and time it precisely is outside what this protects against.
 
 The primitives (X25519, XSalsa20-Poly1305 and BLAKE2b) come from [noble-curves](https://github.com/paulmillr/noble-curves#security), [noble-ciphers](https://github.com/paulmillr/noble-ciphers#security) and [noble-hashes](https://github.com/paulmillr/noble-hashes#security), which have been audited by independent firms; each link lists its audits and what changed since. This library's own code has not been audited: that is how it puts those primitives together into a sealed box, the layout above and the key handling. The sealed box is checked against libsodium in the tests, in both directions.

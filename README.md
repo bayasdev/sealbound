@@ -68,6 +68,8 @@ const sealed = sealer.seal(bytes, ["user", "42", "api-token"]);
 // { ciphertext: Uint8Array, keyId: "9f2c41d07a3be865" }
 ```
 
+A public key and a secret key look alike, 32 bytes of base64 each, so the library can't tell when one is passed for the other: a sealer made from a secret key seals values nothing opens. Name your variables so that can't happen.
+
 Store both fields. `seal` takes a `Uint8Array`; use `new TextEncoder().encode(text)` for a string.
 
 The second argument is the **context**: what the value belongs to. It isn't stored and it isn't secret. You give the same one again to open.
@@ -98,7 +100,7 @@ const bytes = opener.open(sealed, ["user", "42", "api-token"]);
 | `reason` | What happened |
 | --- | --- |
 | `"wrong_context"` | The value was sealed for another context: it belongs to something else. |
-| `"corrupt"` | The ciphertext was altered or damaged. |
+| `"corrupt"` | The ciphertext was altered, damaged or cut short. |
 | `"unknown_key"` | It was sealed with a key this opener doesn't hold. |
 | `"unsupported_version"` | It has a layout this version of the library doesn't read. |
 | `"malformed"` | What was passed isn't a sealed value: for example, the ciphertext came back from the database as a string, or the text wasn't written by `encode`. |
@@ -133,7 +135,7 @@ encode(sealed); // "sb1.9f2c41d07a3be865.kX0rV2c8…"
 
 1. Make a new key pair. Give the openers the new secret key, with the old one as retired: `createOpener({ secretKey: newSecret, retiredSecretKeys: [oldSecret] })`. Old and new values both open.
 2. Give the sealers the new public key.
-3. Run `reseal` over every stored value and save what it returns. It returns `null` for a value already on the current key, and refuses a sealer that isn't on the opener's current key, so a rotation can't look finished while values stay behind.
+3. Run `reseal` over every stored value and save what it returns. It returns `null` for a value already on the current key, and it opens each value it moved with the current key before returning it, so a rotation can't look finished while values stay behind: a sealer that isn't on the opener's current key is refused.
 4. When no stored value has the old `keyId`, drop the old key from the retired list.
 
 ```typescript

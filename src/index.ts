@@ -474,6 +474,13 @@ export const createOpener = (keys: OpenerKeys): Opener => {
   });
 };
 
+const mismatch = (cause?: unknown) =>
+  new SealboundError(
+    "The sealer doesn't seal with the opener's current key",
+    "key_mismatch",
+    { cause }
+  );
+
 /**
  * The value to store in place of `sealed`, sealed with the current key and
  * bound to the same `context`, or null when it already is: the step of a key
@@ -509,15 +516,25 @@ export const reseal = (
     return null;
   }
 
-  // What the sealer made is checked, not what it says of itself: a sealer of
-  // the caller's own, or one whose key id was changed, may seal with another.
+  // What the sealer made is opened, not believed: a sealer of the caller's
+  // own may seal with another key, or for another context, and say it didn't.
+  // The value is on the opener's current key only if that key opens it.
   const moved = checkSealed(sealer.seal(plaintext, context));
 
   if (moved.keyId !== opener.keyId) {
-    throw new SealboundError(
-      "The sealer doesn't seal with the opener's current key",
-      "key_mismatch"
-    );
+    throw mismatch();
+  }
+
+  let reopened: Uint8Array;
+
+  try {
+    reopened = opener.open(moved, context);
+  } catch (error) {
+    throw mismatch(error);
+  }
+
+  if (!equalBytes(reopened, plaintext)) {
+    throw mismatch();
   }
 
   return moved;

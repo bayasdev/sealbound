@@ -1,0 +1,79 @@
+{
+  "name": "sealbound",
+  "version": "1.0.0",
+  "description": "Store secrets in your own database: sealed with a public key, bound to the row they belong to, with key rotation. libsodium sealed boxes on audited noble cryptography, for Node.js, Bun, Deno, browsers and Workers.",
+  "keywords": [
+    "cloudflare workers",
+    "crypto_box_seal",
+    "encryption",
+    "encryption at rest",
+    "key rotation",
+    "libsodium",
+    "nacl",
+    "noble",
+    "public key encryption",
+    "sealed box",
+    "sealedbox",
+    "secrets",
+    "typescript",
+    "x25519",
+    "xsalsa20-poly1305"
+  ],
+  "homepage": "https://github.com/bayasdev/sealbound#readme",
+  "bugs": {
+    "url": "https://github.com/bayasdev/sealbound/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Victor Bayas",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bayasdev/sealbound.git"
+  },
+  "files": [
+    "dist",
+    "llms.txt"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "check": "ultracite check && knip",
+    "check-types": "tsc",
+    "check-package": "publint && attw --pack . --profile esm-only",
+    "fix": "ultracite fix",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm check && pnpm check-types && pnpm test && pnpm build && pnpm check-package"
+  },
+  "dependencies": {
+    "@noble/ciphers": "^2.4.0",
+    "@noble/curves": "^2.4.0",
+    "@noble/hashes": "^2.4.0"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@hegeldev/hegel": "0.5.3",
+    "@oxlint/plugins": "1.91.0",
+    "@types/node": "24.19.2",
+    "knip": "6.44.1",
+    "libsodium-wrappers": "0.8.4",
+    "oxfmt": "0.76.0",
+    "oxlint": "1.91.0",
+    "oxlint-tsgolint": "7.0.2006",
+    "publint": "0.3.25",
+    "tsdown": "0.23.7",
+    "typescript": "7.0.2",
+    "ultracite": "8.1.1",
+    "vitest": "5.1.0"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "packageManager": "pnpm@12.15.0"
+}

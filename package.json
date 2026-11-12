@@ -49,7 +49,7 @@
     "check-package": "publint && attw --pack . --profile esm-only",
     "fix": "ultracite fix",
     "test": "vitest run",
-    "prepublishOnly": "pnpm check && pnpm check-types && pnpm test && pnpm build && pnpm check-package"
+    "prepublishOnly": "pnpm build && pnpm check && pnpm check-types && pnpm test && pnpm check-package"
   },
   "dependencies": {
     "@noble/ciphers": "^2.4.0",

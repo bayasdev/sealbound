@@ -16,7 +16,7 @@ The runtime dependencies are the cryptography, so they are caret ranges: whoever
 
 ## Checks
 
-`pnpm check` (format, lint and unused code), `pnpm check-types`, `pnpm test`, `pnpm build` and `pnpm check-package` (publint and attw) pass before every commit. CI runs all of them on every push, and runs the built package on Node.js, Bun and Deno (`scripts/smoke.mjs`). `pnpm fix` writes the formatting and the safe fixes. Never disable a lint rule to pass it.
+`pnpm build`, `pnpm check` (format, lint and unused code), `pnpm check-types`, `pnpm test` and `pnpm check-package` (publint and attw) pass before every commit. Build first: the lint reads the types of the built package that `scripts/smoke.mjs` imports. CI runs all of them on every push, and runs the built package on Node.js, Bun and Deno (`scripts/smoke.mjs`). `pnpm fix` writes the formatting and the safe fixes. Never disable a lint rule to pass it.
 
 ## Tests
 

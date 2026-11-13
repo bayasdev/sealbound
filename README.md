@@ -100,10 +100,10 @@ const bytes = opener.open(sealed, ["user", "42", "api-token"]);
 | `reason` | What happened |
 | --- | --- |
 | `"wrong_context"` | The value was sealed for another context: it belongs to something else. |
-| `"corrupt"` | The ciphertext was altered, damaged or cut short. |
+| `"corrupt"` | The ciphertext was altered or damaged. |
 | `"unknown_key"` | It was sealed with a key this opener doesn't hold. |
 | `"unsupported_version"` | It has a layout this version of the library doesn't read. |
-| `"malformed"` | What was passed isn't a sealed value: for example, the ciphertext came back from the database as a string, or the text wasn't written by `encode`. |
+| `"malformed"` | What was passed isn't a sealed value: for example, the ciphertext came back from the database as a string, it is shorter than anything this library seals, or the text wasn't written by `encode`. |
 
 Every function checks what it is given and throws one too.
 
@@ -137,6 +137,8 @@ encode(sealed); // "sb1.9f2c41d07a3be865.kX0rV2c8…"
 2. Give the sealers the new public key.
 3. Run `reseal` over every stored value and save what it returns. It returns `null` for a value already on the current key, and it opens each value it moved with the current key before returning it, so a rotation can't look finished while values stay behind: a sealer that isn't on the opener's current key is refused.
 4. When no stored value has the old `keyId`, drop the old key from the retired list.
+
+Use a sealer from `createSealer`. `reseal` hands the sealer each opened value, so a sealer of your own sees every secret; `reseal` checks what it returns, not what it does with what it was given.
 
 ```typescript
 const sealer = createSealer(opener.publicKey);
@@ -175,12 +177,12 @@ As text, a sealed value is `sb1.<keyId>.<ciphertext in base64url without padding
 
 To open one with libsodium in another language:
 
-1. `crypto_box_seal_open(ciphertext, publicKey, secretKey)`.
+1. `crypto_box_seal_open(ciphertext, publicKey, secretKey)`. A ciphertext is at least 81 bytes.
 2. Refuse what it returns if it is shorter than 33 bytes, or if its first byte isn't `0x01`.
 3. Compute the digest of the context you expect and compare it with bytes 1 to 32, in constant time. Refuse it if they differ.
 4. The rest is the value.
 
-Values sealed by any 1.x version keep opening in every later version. A test opens a value that libsodium sealed, so the format can't drift without notice. A sealed value stored as its two fields carries no version outside the box; if the box itself ever changes, the key id's form will tell the two apart, and the text form will get a new prefix.
+Values sealed by any 1.x version keep opening in every later version, with one exception: 1.0.0 derived the box key wrongly on big-endian machines, so a value 1.0.0 sealed on one opens only with 1.0.0. Open such values with 1.0.0 and seal them again with a later version. A test opens a value that libsodium sealed, so the format can't drift without notice. A sealed value stored as its two fields carries no version outside the box; if the box itself ever changes, the key id's form will tell the two apart, and the text form will get a new prefix.
 
 ## What it protects, and what it doesn't
 

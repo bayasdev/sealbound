@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.4
+
+From another review of the code. The format is the same.
+
+- `reseal` gives the sealer copies of the opened value and of the context, and checks the result against its own. A sealer of your own that changed what it was handed could make 1.0.3 accept a value sealed for other bytes or another context.
+- A sealed value's fields are read once, so an object whose fields are computed can't answer one thing when it is checked and another when it is used.
+- A ciphertext shorter than 81 bytes, the shortest this library seals, is refused as `malformed` by `open`, `encode` and `decode`, where `open` used to report it as `corrupt`.
+- A shared secret of all zeros is refused here as well as in noble.
+
 ## 1.0.3
 
 The first release after 1.0.1: 1.0.2 was tagged and never reached npm, because the new publish workflow failed at its last step.

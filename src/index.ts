@@ -80,12 +80,8 @@ const isList = (value: readonly string[]): value is readonly string[] =>
 // are bytes all the same; an object that only names itself one is not.
 const isBytes = (value: Uint8Array): value is Uint8Array => isNobleBytes(value);
 
-const isSealed = (value: Sealed): value is Sealed =>
-  typeof value === "object" &&
-  value !== null &&
-  isBytes(value.ciphertext) &&
-  isText(value.keyId) &&
-  KEY_ID.test(value.keyId);
+const isRecord = (value: Sealed): value is Sealed =>
+  typeof value === "object" && value !== null;
 
 interface OpenerKeys {
   secretKey: string;
@@ -207,6 +203,13 @@ const SIGMA = u32(new TextEncoder().encode("expand 32-byte k"));
  */
 const boxKey = (secretKey: Uint8Array, publicKey: Uint8Array) => {
   const shared = new Uint8Array(x25519.getSharedSecret(secretKey, publicKey));
+
+  // noble refuses the points of low order, whose shared secret is all zeros
+  // whatever the secret key. Checked here too, so that doesn't rest on it.
+  if (shared.every((byte) => byte === 0)) {
+    throw new Error("The two keys share no secret");
+  }
+
   const key = new Uint32Array(KEY_BYTES / 4);
   hsalsa(SIGMA, u32(shared), new Uint32Array(4), key);
 
@@ -359,16 +362,38 @@ const unbind = (framed: Uint8Array, expected: Uint8Array) => {
   return framed.slice(1 + CONTEXT_BYTES);
 };
 
+/**
+ * The shortest box this library seals: the one-time public key, the tag, the
+ * version and the context's digest, around a value of no bytes.
+ */
+const MIN_CIPHERTEXT_BYTES = KEY_BYTES + 16 + 1 + CONTEXT_BYTES;
+
+const notSealed = () =>
+  new SealboundError(
+    "A sealed value is a Uint8Array ciphertext of at least 81 bytes and a key id of 16 hex digits",
+    "malformed"
+  );
+
 /** A stored value as it must be to be opened: its two fields, of their types. */
-const checkSealed = (sealed: Sealed) => {
-  if (!isSealed(sealed)) {
-    throw new SealboundError(
-      "A sealed value is a Uint8Array ciphertext and a key id of 16 hex digits",
-      "malformed"
-    );
+const checkSealed = (sealed: Sealed): Sealed => {
+  if (!isRecord(sealed)) {
+    throw notSealed();
   }
 
-  return sealed;
+  // Each field is read once and what was read is what is used: an object
+  // whose fields are computed could answer differently the second time.
+  const { ciphertext, keyId } = sealed;
+
+  if (
+    !isBytes(ciphertext) ||
+    ciphertext.length < MIN_CIPHERTEXT_BYTES ||
+    !isText(keyId) ||
+    !KEY_ID.test(keyId)
+  ) {
+    throw notSealed();
+  }
+
+  return { ciphertext, keyId };
 };
 
 /** A new key pair, each half as standard base64. */
@@ -484,7 +509,8 @@ const mismatch = (cause?: unknown) =>
 /**
  * The value to store in place of `sealed`, sealed with the current key and
  * bound to the same `context`, or null when it already is: the step of a key
- * rotation, run over every stored value. The sealer must seal with the
+ * rotation, run over every stored value. The sealer is given the opened
+ * value, so it must be one you trust. The sealer must seal with the
  * opener's current key; with any other, a rotation would look finished while
  * values stayed on a key about to be dropped, or move to one nobody can open.
  */
@@ -501,39 +527,44 @@ export const reseal = (
   }
 
   const { opener, sealer } = tools;
+  const current = opener.keyId;
 
-  if (sealer.keyId !== opener.keyId) {
-    throw new SealboundError(
-      "The sealer doesn't seal with the opener's current key",
-      "key_mismatch"
-    );
+  if (sealer.keyId !== current) {
+    throw mismatch();
   }
 
-  // Opened first in every case, so a value bound to another owner is refused.
-  const plaintext = opener.open(sealed, context);
+  // Everything is read once and kept: the stored value, the context and the
+  // opened bytes. The sealer gets copies, so one that changes what it is
+  // handed changes nothing that is checked afterwards.
+  const stored = checkSealed(sealed);
+  const bound = isOnePart(context) ? context : [...context];
+  const original = opener.open(stored, bound);
 
-  if (sealed.keyId === opener.keyId) {
+  if (stored.keyId === current) {
     return null;
   }
 
   // What the sealer made is opened, not believed: a sealer of the caller's
-  // own may seal with another key, or for another context, and say it didn't.
-  // The value is on the opener's current key only if that key opens it.
-  const moved = checkSealed(sealer.seal(plaintext, context));
+  // own may seal with another key, for another context or another value, and
+  // say it didn't. The value is on the opener's current key only if that key
+  // opens it to the same bytes.
+  const moved = checkSealed(
+    sealer.seal(new Uint8Array(original), isOnePart(bound) ? bound : [...bound])
+  );
 
-  if (moved.keyId !== opener.keyId) {
+  if (moved.keyId !== current) {
     throw mismatch();
   }
 
   let reopened: Uint8Array;
 
   try {
-    reopened = opener.open(moved, context);
+    reopened = opener.open(moved, bound);
   } catch (error) {
     throw mismatch(error);
   }
 
-  if (!equalBytes(reopened, plaintext)) {
+  if (!equalBytes(reopened, original)) {
     throw mismatch();
   }
 

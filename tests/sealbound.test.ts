@@ -762,3 +762,97 @@ describe("what the third review found", () => {
     expect(refusal(() => createSealer(respelled))).toBe("invalid_key");
   });
 });
+
+describe("what the fourth review found", () => {
+  const retired = generateKeys();
+
+  const rotated = createOpener({
+    retiredSecretKeys: [retired.secretKey],
+    secretKey: keys.secretKey,
+  });
+
+  const old = createSealer(retired.publicKey);
+
+  it("a sealer that changes the bytes or the context it is handed changes nothing reseal checks", () => {
+    const changingBytes = {
+      keyId: rotated.keyId,
+      seal: (plaintext: Uint8Array, context: Context) => {
+        plaintext.fill(9);
+
+        return sealer.seal(plaintext, context);
+      },
+    };
+
+    const changingContext = {
+      keyId: rotated.keyId,
+      seal: (plaintext: Uint8Array, context: Context) => {
+        Object.assign(context, { 1: "b" });
+
+        return sealer.seal(plaintext, context);
+      },
+    };
+
+    const context = ["user", "a", "api-token"];
+    const box = old.seal(new Uint8Array([1]), context);
+    expect(
+      [changingBytes, changingContext].map((custom) =>
+        refusal(
+          () => reseal({ opener: rotated, sealer: custom }, box, context) ?? {}
+        )
+      )
+    ).toStrictEqual(["key_mismatch", "key_mismatch"]);
+    // The caller's own list is as it was: the sealer was handed a copy.
+    expect(context).toStrictEqual(["user", "a", "api-token"]);
+  });
+
+  it("a sealed value's fields are read once each, so one that answers differently each time is read as it first answered", () => {
+    const box = sealer.seal(new Uint8Array([3]), CONTEXT);
+    let reads = 0;
+
+    const shifting = {
+      ciphertext: box.ciphertext,
+      get keyId() {
+        reads += 1;
+
+        return reads === 1 ? box.keyId : "0000000000000000";
+      },
+    };
+
+    expect(opener.open(shifting, CONTEXT)).toStrictEqual(new Uint8Array([3]));
+    expect(reads).toBe(1);
+  });
+
+  it("a ciphertext shorter than any this library seals is no sealed value, as bytes or as text", () => {
+    hegel.test((tc) => {
+      // The shortest box is 81 bytes: a 32-byte key, a 16-byte tag, the
+      // version and the 32-byte digest, around a value of no bytes.
+      const short = new Uint8Array(tc.draw(gs.binary({ maxSize: 80 })));
+      const text = `sb1.${sealer.keyId}.${Buffer.from(short).toString("base64url")}`;
+      expect([
+        refusal(() =>
+          opener.open({ ciphertext: short, keyId: opener.keyId }, CONTEXT)
+        ),
+        refusal(() => decode(text)),
+      ]).toStrictEqual(["malformed", "malformed"]);
+    });
+  });
+
+  it("the shortest value there is, one of no bytes, is sealed, written and opened", () => {
+    const sealed = sealer.seal(new Uint8Array(0), CONTEXT);
+    // 32 + 16 + 1 + 32, the box around nothing.
+    expect(sealed.ciphertext).toHaveLength(81);
+    expect(opener.open(decode(encode(sealed)), CONTEXT)).toHaveLength(0);
+  });
+
+  it("a box whose one-time key is a point of low order opens to nothing, whatever follows it", () => {
+    hegel.test((tc) => {
+      // All zeros is a point of low order (RFC 7748, section 6.1): its
+      // shared secret with any key is all zeros, which anyone can compute.
+      const rest = tc.draw(gs.binary({ maxSize: 200, minSize: 49 }));
+      const ciphertext = Uint8Array.from([...new Uint8Array(32), ...rest]);
+      expect(
+        refusal(() => opener.open({ ciphertext, keyId: opener.keyId }, CONTEXT))
+      ).toBe("corrupt");
+    });
+  });
+});

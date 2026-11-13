@@ -4,7 +4,7 @@ sealbound seals secrets for storage in an application's own database: with a pub
 
 ## The format
 
-A sealed value is a libsodium sealed box (`crypto_box_seal`) of a version byte, the context's digest and the value. The README states the digest, the key id and the text form exactly, and that statement is the contract: values sealed by any released version must keep opening. A change to the layout gets a new version byte, or a new text prefix when the outer box changes, and the opener keeps reading the old one. `tests/sealbound.test.ts` holds a value libsodium sealed that every version must open; never regenerate it to make a change pass.
+A sealed value is a libsodium sealed box (`crypto_box_seal`) of a version byte, the context's digest and the value. The README states the digest, the key id and the text form exactly, and that statement is the contract: values sealed by any released version must keep opening. The one exception is in the README: what 1.0.0 sealed on a big-endian machine. A change to the layout gets a new version byte, or a new text prefix when the outer box changes, and the opener keeps reading the old one. `tests/sealbound.test.ts` holds a value libsodium sealed that every version must open; never regenerate it to make a change pass.
 
 The primitives come from the noble libraries and nothing here reimplements one. Putting them together into a sealed box is this library's own code, checked against libsodium both ways in the tests. The library uses only what every runtime has (`atob`, `btoa`, `TextEncoder`, the Web Crypto random source through noble): no `node:` module and no `Buffer` in `src`.
 

@@ -180,8 +180,8 @@ importers:
         specifier: 0.18.5
         version: 0.18.5
       '@hegeldev/hegel':
-        specifier: 0.5.3
-        version: 0.5.3
+        specifier: 0.5.7
+        version: 0.5.7
       '@oxlint/plugins':
         specifier: 1.93.0
         version: 1.93.0
@@ -189,8 +189,8 @@ importers:
         specifier: 24.19.2
         version: 24.19.2
       knip:
-        specifier: 6.44.2
-        version: 6.44.2
+        specifier: 6.45.1
+        version: 6.45.1
       libsodium-wrappers:
         specifier: 0.8.4
         version: 0.8.4
@@ -199,10 +199,10 @@ importers:
         version: 0.78.0
       oxlint:
         specifier: 1.93.0
-        version: 1.93.0(oxlint-tsgolint@7.0.2006)
+        version: 1.93.0(oxlint-tsgolint@7.0.2007)
       oxlint-tsgolint:
-        specifier: 7.0.2006
-        version: 7.0.2006
+        specifier: 7.0.2007
+        version: 7.0.2007
       publint:
         specifier: 0.3.25
         version: 0.3.25
@@ -213,8 +213,8 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
       ultracite:
-        specifier: 8.1.1
-        version: 8.1.1(oxfmt@0.78.0)(oxlint@1.93.0(oxlint-tsgolint@7.0.2006))
+        specifier: 8.2.1
+        version: 8.2.1(oxfmt@0.78.0)(oxlint@1.93.0(oxlint-tsgolint@7.0.2007))
       vitest:
         specifier: 5.1.0
         version: 5.1.0(@types/node@24.19.2)(vite@8.3.8(@types/node@24.19.2)(jiti@2.7.0)(yaml@2.9.1))
@@ -283,38 +283,38 @@ packages:
   '@emnapi/wasi-threads@2.2.0':
     resolution: {integrity: sha512-JP7OYH38Q7+pyTAe14raZHLQIK7BDKbdwji+Xi3pcd/6QkJYQH3SX4wu6EplGrGJWRepoNzedfm0G3B9Z4e9Rw==}
 
-  '@hegeldev/hegel-darwin-arm64@0.5.3':
-    resolution: {integrity: sha512-Nky+fK3znShRsWpsydPu2yiHoNwG/lWAsfIZi6fTovVR2OrtLKizaB/evs0T3qVpqAhy0AVntJBeLUO04C7JsA==}
+  '@hegeldev/hegel-darwin-arm64@0.5.7':
+    resolution: {integrity: sha512-0dXdKeIFtUfRtG8Z8zUzHI5bsPzz7BzHagcsqUXeU1V5Ac6qV5iiiD99nrFXJcA28YMtzUq9ky9X+XKCiCgmOQ==}
     engines: {node: '>=20.11.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@hegeldev/hegel-linux-arm64@0.5.3':
-    resolution: {integrity: sha512-+FCakkZp7X1vb04wXXrKU0FYnYBuwlV+I4acwwljhDTNsWAkxCQfIzAvVH7IeJCt6Zk6YXbgj4J4e9hXmtaOPQ==}
+  '@hegeldev/hegel-linux-arm64@0.5.7':
+    resolution: {integrity: sha512-Jw/i/ZBSxheQEJqjQJSZiL25A+6m1lUUJCAxmqakamfX97s5b7b7iIW5PRNNW+U5xxZN4sA6yKghRuOQ8ZsSZA==}
     engines: {node: '>=20.11.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@hegeldev/hegel-linux-x64@0.5.3':
-    resolution: {integrity: sha512-3AvhycklwiVmVCPu3mCjCRu8WgkCPDrYCy1Xprsiej8sb42CzFEqwgn471J7Kp66CvVRm3LliDQJqT+4FJgaeA==}
+  '@hegeldev/hegel-linux-x64@0.5.7':
+    resolution: {integrity: sha512-NXW2sgLYMQT1fzXpd/WssSVUpGNyLOr0DbN3Vo2f09cziWYqwqRwTOhheU4SLet/m20Q3k/q7HdegiK57t/RpQ==}
     engines: {node: '>=20.11.0'}
     cpu: [x64]
     os: [linux]
 
-  '@hegeldev/hegel-win32-arm64@0.5.3':
-    resolution: {integrity: sha512-wW44cR20p6jKE7F8Z7Geic0RzNMEUDf1XKz/yDwAXGrYb8TBmJYTEJtBol7UVIHRyGRNgnBMQdorr1Bs3wV8rw==}
+  '@hegeldev/hegel-win32-arm64@0.5.7':
+    resolution: {integrity: sha512-H37zGhgZZx27GwnXUBUIro/UGR8qfQ5VP9Cs+Q2GJktmKRnm2daBN22Pb7b9V/PZggJu9zaAkF+FDhsGaILX3w==}
     engines: {node: '>=20.11.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@hegeldev/hegel-win32-x64@0.5.3':
-    resolution: {integrity: sha512-wRRpkxzPfzS/mLgwttsysvseCa0Yc4s4HL4vFOkKIhwdYp1OH+7PbW1zTKf5r3BTIvGx9MQRBPZ/avBExNAFWQ==}
+  '@hegeldev/hegel-win32-x64@0.5.7':
+    resolution: {integrity: sha512-id2DSbVIwMIybSLvWHoChr8sCYkVH7DWN3rvmI86l7eDUONaVJIwW1Nup6FfZyEWwrN0LqjQR37AcbicxbybNA==}
     engines: {node: '>=20.11.0'}
     cpu: [x64]
     os: [win32]
 
-  '@hegeldev/hegel@0.5.3':
-    resolution: {integrity: sha512-uxxk3j3ZPHBjPNgeCyvyrW9Jy5giN2N3MPsqQzP9bNYEq3oJiVwpqftM0r68eB3g9jPlB/du7F9jbCCWa4i2SA==}
+  '@hegeldev/hegel@0.5.7':
+    resolution: {integrity: sha512-1y3RAUus/Jr0YuicBJ2exNCKIabI8C2Pq7dh9fkUT1xc0u333puELQqAZXkhPor9YEDhC7q8SiGsti/GlzLouw==}
     engines: {node: '>=20.11.0'}
 
   '@jridgewell/resolve-uri@3.1.2':
@@ -821,33 +821,33 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@oxlint-tsgolint/darwin-arm64@7.0.2006':
-    resolution: {integrity: sha512-uc0MEHXZUDW23Zmo5X28eSNeSnP17jKnh9GiehpVZqhfy99ks8spyXT5Llar3tjDN7ppnQN0Qd9FK6WNkdD+fQ==}
+  '@oxlint-tsgolint/darwin-arm64@7.0.2007':
+    resolution: {integrity: sha512-bjNxPFyu1wNK74epHzXrtVLrj7oEuB8jQvJZDSia2d5EZ/0YgnyhI37E9U530IUZlNCqlTWjko1iT3CKAYF9+A==}
     cpu: [arm64]
     os: [darwin]
 
-  '@oxlint-tsgolint/darwin-x64@7.0.2006':
-    resolution: {integrity: sha512-+x1/pa3S3VMC9cif8XKTOCQUuqRT+wu1Ix+FK5svXa2xbXCuE7+4S0SfmuSnK/mk9AI5+xBxZFhILxmCPUZ1hA==}
+  '@oxlint-tsgolint/darwin-x64@7.0.2007':
+    resolution: {integrity: sha512-dCd7mzk2FeTaU46LLeXy5mQyEFICaPqlew/LpehNzEuL86D0jTYlwZHbibRqdRrvkSNgq1szz/7014FIHgyV1g==}
     cpu: [x64]
     os: [darwin]
 
-  '@oxlint-tsgolint/linux-arm64@7.0.2006':
-    resolution: {integrity: sha512-90v7HX8m54kHXn5DpjNEN18Fb7xwJMREe/wji3USyAf9pTMv7a3qZ3cPoLViIcIzxPLmkcYZIs1j1H3Z2gbVLA==}
+  '@oxlint-tsgolint/linux-arm64@7.0.2007':
+    resolution: {integrity: sha512-qb0XUQXuTmQ8H++zsx/tQitG0/fU3BE16KGp1qXExeDgRzEc7WIlCuN1i+rmA40lty9gQs+x3a73BFODVhTZqA==}
     cpu: [arm64]
     os: [linux]
 
-  '@oxlint-tsgolint/linux-x64@7.0.2006':
-    resolution: {integrity: sha512-/k0wsEqHiA5dWBJYuld3Vecv6bIhKCasxpho/aFkvh870Qox33MuTkKUGWIVm/njAxw7W4pu1a/Xfa3jwuKuPQ==}
+  '@oxlint-tsgolint/linux-x64@7.0.2007':
+    resolution: {integrity: sha512-75vx0067HSgxq/HEZzlHwqhcujn3bshg43fVLTx604jZdZZMQfPVCcxTh2RTEShP7ACT1PRty6vboZlWh5RtEA==}
     cpu: [x64]
     os: [linux]
 
-  '@oxlint-tsgolint/win32-arm64@7.0.2006':
-    resolution: {integrity: sha512-CQT5sqcLZLNZSWLzUUEjQmp74UX8h1agp3ZJ8pfRktHbx6gfBa8a7CjrnRrZ9VXlwnXVkpw7m5KBO6y+S5MQRA==}
+  '@oxlint-tsgolint/win32-arm64@7.0.2007':
+    resolution: {integrity: sha512-6zl7I+BvScfOPtnPtSEP5JA+z8NkDPGd47YnQChL5lLF/Dzs7Rasr1G+q0zGlQcP8OEgW43hW4QlUTXxPfD13Q==}
     cpu: [arm64]
     os: [win32]
 
-  '@oxlint-tsgolint/win32-x64@7.0.2006':
-    resolution: {integrity: sha512-VZsGowXcp3vQNkjoGeVCOTf4aGrRpRk6bBJWhefnJVPr6z+dX+LKqqHfwaqnFvg66Q2iJpXqklRW38YO21ee+Q==}
+  '@oxlint-tsgolint/win32-x64@7.0.2007':
+    resolution: {integrity: sha512-VptFHYhBm0SIWCUkx89hmTrKVOQsDg0iB1YE3EBlvRRtCHGUd3pU1kMxPBg1wOd83ZMmIn7zB6maBROtpmrP5g==}
     cpu: [x64]
     os: [win32]
 
@@ -1662,8 +1662,8 @@ packages:
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
 
-  knip@6.44.2:
-    resolution: {integrity: sha512-6URO7pnqtOnyvSsXfW6+8C9j1lfcicxUCysXO0RgMtHTZ96HqCXh29op8iabeQW5JeIc8dJWwzSdJVWDokeScQ==}
+  knip@6.45.1:
+    resolution: {integrity: sha512-zp3zXKy2cZWiIttdlWU5fisKxVQaLSU6471ej0KGz1GdHdaHxpzTAO/LIyFNc3gU3v1W7LJaqvYumoO3l/u+6A==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
@@ -1850,8 +1850,8 @@ packages:
       vite-plus:
         optional: true
 
-  oxlint-tsgolint@7.0.2006:
-    resolution: {integrity: sha512-5B3UtH71kycPHUC1kFEIffivEAs49SUmkJuHZOZnTY0NPj4legp0bcsCQucuLVNCoJzDucS68P2C4WIhP+LypQ==}
+  oxlint-tsgolint@7.0.2007:
+    resolution: {integrity: sha512-i8X2qf6VVqFzoNVP34joMKuZpO6T2uXMOgKJaSPFc6p+E3FTnbIGPRbI8K4ZApmtDTMu2CIeGfpzeK1zzGwfnA==}
     hasBin: true
 
   oxlint@1.93.0:
@@ -2129,8 +2129,8 @@ packages:
   ufo@1.6.4:
     resolution: {integrity: sha512-JFNbkD1Svwe0KvGi8GOeLcP4kAWQ609twvCdcHxq1oSL8svv39ZuSvajcD8B+5D0eL4+s1Is2D/O6KN3qcTeRA==}
 
-  ultracite@8.1.1:
-    resolution: {integrity: sha512-L4gRVHVm8AWvKr/TF6Zz2g23awXsEn+2P4X1BXE8Xwm9p2ZggkQBFbroWM7eCkZ59PtAnMp3wmLFXbxVLv8Btw==}
+  ultracite@8.2.1:
+    resolution: {integrity: sha512-+HAwOkdpdNaf6Fr+JEh0YkikJU4vjRO977kMAvtOsk8YWk+VG3rdy7gyFLgbO1Edv+k5hhL/3CKAiEmUlvt3ow==}
     engines: {node: ^22.22.2 || >=24.15.0}
     hasBin: true
     peerDependencies:
@@ -2407,30 +2407,30 @@ snapshots:
       tslib: 2.9.1
     optional: true
 
-  '@hegeldev/hegel-darwin-arm64@0.5.3':
+  '@hegeldev/hegel-darwin-arm64@0.5.7':
     optional: true
 
-  '@hegeldev/hegel-linux-arm64@0.5.3':
+  '@hegeldev/hegel-linux-arm64@0.5.7':
     optional: true
 
-  '@hegeldev/hegel-linux-x64@0.5.3':
+  '@hegeldev/hegel-linux-x64@0.5.7':
     optional: true
 
-  '@hegeldev/hegel-win32-arm64@0.5.3':
+  '@hegeldev/hegel-win32-arm64@0.5.7':
     optional: true
 
-  '@hegeldev/hegel-win32-x64@0.5.3':
+  '@hegeldev/hegel-win32-x64@0.5.7':
     optional: true
 
-  '@hegeldev/hegel@0.5.3':
+  '@hegeldev/hegel@0.5.7':
     dependencies:
       koffi: 3.3.7
     optionalDependencies:
-      '@hegeldev/hegel-darwin-arm64': 0.5.3
-      '@hegeldev/hegel-linux-arm64': 0.5.3
-      '@hegeldev/hegel-linux-x64': 0.5.3
-      '@hegeldev/hegel-win32-arm64': 0.5.3
-      '@hegeldev/hegel-win32-x64': 0.5.3
+      '@hegeldev/hegel-darwin-arm64': 0.5.7
+      '@hegeldev/hegel-linux-arm64': 0.5.7
+      '@hegeldev/hegel-linux-x64': 0.5.7
+      '@hegeldev/hegel-win32-arm64': 0.5.7
+      '@hegeldev/hegel-win32-x64': 0.5.7
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
@@ -2718,22 +2718,22 @@ snapshots:
   '@oxfmt/binding-win32-x64-msvc@0.78.0':
     optional: true
 
-  '@oxlint-tsgolint/darwin-arm64@7.0.2006':
+  '@oxlint-tsgolint/darwin-arm64@7.0.2007':
     optional: true
 
-  '@oxlint-tsgolint/darwin-x64@7.0.2006':
+  '@oxlint-tsgolint/darwin-x64@7.0.2007':
     optional: true
 
-  '@oxlint-tsgolint/linux-arm64@7.0.2006':
+  '@oxlint-tsgolint/linux-arm64@7.0.2007':
     optional: true
 
-  '@oxlint-tsgolint/linux-x64@7.0.2006':
+  '@oxlint-tsgolint/linux-x64@7.0.2007':
     optional: true
 
-  '@oxlint-tsgolint/win32-arm64@7.0.2006':
+  '@oxlint-tsgolint/win32-arm64@7.0.2007':
     optional: true
 
-  '@oxlint-tsgolint/win32-x64@7.0.2006':
+  '@oxlint-tsgolint/win32-x64@7.0.2007':
     optional: true
 
   '@oxlint/binding-android-arm-eabi@1.93.0':
@@ -3252,7 +3252,7 @@ snapshots:
 
   jsonc-parser@3.3.1: {}
 
-  knip@6.44.2:
+  knip@6.45.1:
     dependencies:
       formatly: 0.11.4
       get-tsconfig: 4.14.3
@@ -3265,7 +3265,6 @@ snapshots:
       tinyglobby: 0.2.17
       unbash: 6.0.4
       yaml: 2.9.1
-      zod: 4.6.7
 
   koffi@3.3.7:
     optionalDependencies:
@@ -3501,16 +3500,16 @@ snapshots:
       '@oxfmt/binding-win32-ia32-msvc': 0.78.0
       '@oxfmt/binding-win32-x64-msvc': 0.78.0
 
-  oxlint-tsgolint@7.0.2006:
+  oxlint-tsgolint@7.0.2007:
     optionalDependencies:
-      '@oxlint-tsgolint/darwin-arm64': 7.0.2006
-      '@oxlint-tsgolint/darwin-x64': 7.0.2006
-      '@oxlint-tsgolint/linux-arm64': 7.0.2006
-      '@oxlint-tsgolint/linux-x64': 7.0.2006
-      '@oxlint-tsgolint/win32-arm64': 7.0.2006
-      '@oxlint-tsgolint/win32-x64': 7.0.2006
+      '@oxlint-tsgolint/darwin-arm64': 7.0.2007
+      '@oxlint-tsgolint/darwin-x64': 7.0.2007
+      '@oxlint-tsgolint/linux-arm64': 7.0.2007
+      '@oxlint-tsgolint/linux-x64': 7.0.2007
+      '@oxlint-tsgolint/win32-arm64': 7.0.2007
+      '@oxlint-tsgolint/win32-x64': 7.0.2007
 
-  oxlint@1.93.0(oxlint-tsgolint@7.0.2006):
+  oxlint@1.93.0(oxlint-tsgolint@7.0.2007):
     optionalDependencies:
       '@oxlint/binding-android-arm-eabi': 1.93.0
       '@oxlint/binding-android-arm64': 1.93.0
@@ -3531,7 +3530,7 @@ snapshots:
       '@oxlint/binding-win32-arm64-msvc': 1.93.0
       '@oxlint/binding-win32-ia32-msvc': 1.93.0
       '@oxlint/binding-win32-x64-msvc': 1.93.0
-      oxlint-tsgolint: 7.0.2006
+      oxlint-tsgolint: 7.0.2007
 
   package-manager-detector@1.9.0: {}
 
@@ -3800,7 +3799,7 @@ snapshots:
 
   ufo@1.6.4: {}
 
-  ultracite@8.1.1(oxfmt@0.78.0)(oxlint@1.93.0(oxlint-tsgolint@7.0.2006)):
+  ultracite@8.2.1(oxfmt@0.78.0)(oxlint@1.93.0(oxlint-tsgolint@7.0.2007)):
     dependencies:
       '@clack/prompts': 1.9.0
       cli-truncate: 6.2.0
@@ -3823,7 +3822,7 @@ snapshots:
       zod: 4.6.7
     optionalDependencies:
       oxfmt: 0.78.0
-      oxlint: 1.93.0(oxlint-tsgolint@7.0.2006)
+      oxlint: 1.93.0(oxlint-tsgolint@7.0.2007)
 
   unbash@6.0.4: {}
 
